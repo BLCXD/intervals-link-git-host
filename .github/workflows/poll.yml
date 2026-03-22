@@ -1,0 +1,26 @@
+name: intervals.icu poll
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Poll intervals.icu and send push
+        env:
+          ICU_API_KEY:    ${{ secrets.ICU_API_KEY }}
+          ICU_ATHLETE_ID: ${{ secrets.ICU_ATHLETE_ID }}
+          VAPID_PUBLIC:   ${{ secrets.VAPID_PUBLIC }}
+          VAPID_PRIVATE:  ${{ secrets.VAPID_PRIVATE }}
+          GIST_TOKEN:     ${{ secrets.GIST_TOKEN }}
+          GIST_ID:        ${{ secrets.GIST_ID }}
+        run: node scripts/poll.js

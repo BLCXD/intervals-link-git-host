@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Link - intervals.icu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f11;--bg2:#141618;--bg3:#1a1d20;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#f0ede8;--text2:#9a9893;--text3:#4a4845;--accent:#e8563a;--accent2:#ff7b5e;--green:#3dba7e;--blue:#4a9eff;--amber:#f5a623;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden;}
+.screen{display:none;min-height:100vh;}.screen.active{display:flex;}
+#screen-connect{flex-direction:column;align-items:center;justify-content:center;padding:2rem;position:relative;overflow:hidden;}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.028) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,black,transparent);pointer-events:none;}
+.bg-glow{position:absolute;top:-15%;left:50%;transform:translateX(-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(232,86,58,0.11) 0%,transparent 65%);pointer-events:none;}
+.connect-card{position:relative;z-index:1;background:var(--bg2);border:1px solid var(--border2);border-radius:22px;padding:2.75rem;width:100%;max-width:420px;box-shadow:0 40px 80px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.06);animation:cardIn .55s cubic-bezier(.22,1,.36,1) both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(0.98);}}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:2.5rem;}
+.brand-icon{width:34px;height:34px;border-radius:9px;background:linear-gradient(145deg,var(--accent2),#c03520);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(232,86,58,0.4);}
+.brand-icon svg{width:17px;height:17px;fill:white;}
+.brand-name{font-size:14px;font-weight:600;color:var(--text);}
+.brand-name em{font-style:normal;color:var(--text2);font-weight:300;}
+.connect-title{font-size:24px;font-weight:600;letter-spacing:-0.035em;margin-bottom:8px;}
+.connect-sub{font-size:13.5px;color:var(--text2);margin-bottom:2rem;line-height:1.6;}
+.field-group{margin-bottom:1.1rem;}
+.field-label{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:7px;}
+.field-label a{color:var(--accent2);text-decoration:none;text-transform:none;letter-spacing:0;font-size:12px;}
+.field-label a:hover{text-decoration:underline;}
+.input-wrap{position:relative;}
+.input-wrap input{width:100%;padding:12px 40px 12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.input-wrap input::placeholder{color:var(--text3);font-family:var(--font);}
+.input-wrap input:focus{border-color:rgba(232,86,58,0.4);box-shadow:0 0 0 3px rgba(232,86,58,0.08);}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;}
+.eye-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.remember-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.remember-row input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);cursor:pointer;}
+.remember-row label{font-size:12px;color:var(--text2);cursor:pointer;}
+.key-hint{display:flex;align-items:flex-start;gap:8px;background:rgba(232,86,58,0.06);border:1px solid rgba(232,86,58,0.14);border-radius:9px;padding:11px 13px;margin-bottom:1.5rem;}
+.key-hint svg{width:14px;height:14px;flex-shrink:0;margin-top:2px;fill:var(--accent);opacity:.8;}
+.key-hint p{font-size:12px;color:var(--text2);line-height:1.6;}
+.key-hint code{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,0.06);border-radius:4px;padding:1px 5px;color:var(--text);}
+.btn-connect{width:100%;padding:13.5px;background:var(--accent);border:none;border-radius:10px;color:white;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:background .15s,transform .1s;box-shadow:0 4px 20px rgba(232,86,58,0.35);position:relative;overflow:hidden;}
+.btn-connect:hover{background:#d94530;transform:translateY(-1px);}
+.btn-connect:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto;}
+.btn-connect.loading .btn-text{display:none;}.btn-connect.loading .spinner{display:block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.connect-error{margin-top:12px;padding:10px 13px;background:rgba(226,75,74,0.08);border:1px solid rgba(226,75,74,0.2);border-radius:9px;font-size:12.5px;color:#f08080;display:none;}
+.divider{display:flex;align-items:center;gap:12px;margin:1.5rem 0;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.btn-demo{width:100%;padding:12px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--text2);font-family:var(--font);font-size:14px;cursor:pointer;transition:background .15s,color .15s;}
+.btn-demo:hover{background:var(--bg3);color:var(--text);}
+.footer-note{margin-top:2rem;font-size:11.5px;color:var(--text3);text-align:center;line-height:1.6;}
+.footer-note a{color:var(--text2);text-decoration:none;}
+.footer-note a:hover{text-decoration:underline;}
+#screen-dashboard{flex-direction:column;}
+.topnav{display:flex;align-items:center;gap:12px;padding:0 1.5rem;height:56px;border-bottom:1px solid var(--border);background:rgba(13,15,17,0.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;flex-shrink:0;}
+.topnav-brand{display:flex;align-items:center;gap:8px;}
+.topnav-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(145deg,var(--accent2),#c03520);display:flex;align-items:center;justify-content:center;}
+.topnav-icon svg{width:13px;height:13px;fill:white;}
+.topnav-title{font-size:14px;font-weight:600;letter-spacing:-0.02em;}
+.topnav-title span{color:var(--text2);font-weight:300;}
+.topnav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.push-pill{display:flex;align-items:center;gap:5px;font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--bg3);color:var(--text3);cursor:pointer;transition:all .15s;}
+.push-pill:hover{color:var(--text2);border-color:var(--border2);}
+.push-pill.granted{color:var(--green);border-color:rgba(61,186,126,0.3);}
+.push-pill.denied{color:#f08080;border-color:rgba(226,75,74,0.3);}
+.push-pill svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.athlete-chip{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px 5px 6px;}
+.athlete-avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#7b3af0);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:white;}
+.athlete-name-lbl{font-size:12px;color:var(--text2);}
+.status-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 10px;}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--text3);}
+.sdot.live{background:var(--green);box-shadow:0 0 0 3px rgba(61,186,126,0.2);animation:livePulse 2s ease infinite;}
+.sdot.err{background:#e24b4a;}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 3px rgba(61,186,126,0.2);}50%{box-shadow:0 0 0 5px rgba(61,186,126,0.05);}}
+.dash-body{flex:1;display:flex;flex-direction:column;max-width:640px;width:100%;margin:0 auto;padding:1.5rem;}
+.summary-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+.sc{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:14px 16px;position:relative;overflow:hidden;animation:fadeUp .4s both;}
+.sc:nth-child(1){animation-delay:.05s;}.sc:nth-child(2){animation-delay:.1s;}.sc:nth-child(3){animation-delay:.15s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}}
+.sc-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.sc-val{font-size:24px;font-weight:600;letter-spacing:-0.04em;}
+.sc-val.w{color:var(--blue);}.sc-val.t{color:var(--green);}.sc-val.m{color:var(--amber);}
+.sc-ico{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:20px;opacity:.12;}
+.controls-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap;animation:fadeUp .4s .2s both;}
+.fp{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.fp .dot{width:7px;height:7px;border-radius:50%;background:var(--text3);}
+.fp:hover{border-color:var(--border2);color:var(--text);}
+.fp.on{background:var(--bg3);border-color:var(--border2);color:var(--text);}
+.fp.on.fw .dot{background:var(--blue);}.fp.on.ft .dot{background:var(--green);}.fp.on.fm .dot{background:var(--amber);}
+.ml{margin-left:auto;}
+.rbtn{width:30px;height:30px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.rbtn:hover{border-color:var(--border2);color:var(--text);}
+.rbtn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.rbtn.spinning svg{animation:spin .6s linear infinite;}
+.sec-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.nlist{display:flex;flex-direction:column;gap:2px;animation:fadeUp .4s .25s both;}
+.ni{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid transparent;transition:background .15s,border-color .15s;animation:niIn .3s cubic-bezier(.22,1,.36,1) both;}
+.ni:hover{background:var(--bg2);border-color:var(--border);}
+@keyframes niIn{from{opacity:0;transform:translateX(-8px);}}
+.ni-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.ni-ico.w{background:rgba(74,158,255,0.1);}.ni-ico.t{background:rgba(61,186,126,0.1);}.ni-ico.m{background:rgba(245,166,35,0.1);}
+.ni-body{flex:1;min-width:0;}
+.ni-title{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ni-desc{font-size:12.5px;color:var(--text2);margin-top:2px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.ni-meta{font-size:11px;color:var(--text3);margin-top:5px;display:flex;align-items:center;gap:6px;}
+.tag{padding:1px 7px;border-radius:4px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;}
+.tag.w{background:rgba(74,158,255,0.12);color:#7ab8ff;}.tag.t{background:rgba(61,186,126,0.12);color:#6ddba6;}.tag.m{background:rgba(245,166,35,0.12);color:#f5c043;}
+.ni-new{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px;box-shadow:0 0 0 3px rgba(232,86,58,0.15);}
+.empty{text-align:center;padding:4rem 2rem;}
+.empty-ico{font-size:40px;margin-bottom:16px;opacity:.4;}
+.empty-title{font-size:15px;font-weight:500;color:var(--text2);margin-bottom:6px;}
+.empty-sub{font-size:13px;color:var(--text3);}
+.poll-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);margin-top:1rem;font-size:12px;color:var(--text3);flex-wrap:wrap;gap:8px;animation:fadeUp .4s .35s both;}
+.isel{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-family:var(--font);font-size:12px;padding:4px 8px;outline:none;cursor:pointer;}
+.disc-btn{background:none;border:none;color:var(--text3);font-family:var(--font);font-size:12px;cursor:pointer;padding:4px 8px;border-radius:6px;transition:color .15s,background .15s;}
+.disc-btn:hover{color:#f08080;background:rgba(226,75,74,0.06);}
+.demo-banner{display:none;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.15);font-size:12px;color:#ccc;margin-bottom:1rem;}
+.demo-banner svg{width:14px;height:14px;flex-shrink:0;fill:var(--amber);}
+.toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;display:flex;flex-direction:column;gap:8px;z-index:9999;pointer-events:none;}
+.toast{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--text);box-shadow:0 8px 32px rgba(0,0,0,0.4);display:flex;align-items:center;gap:10px;max-width:320px;pointer-events:auto;animation:toastIn .3s cubic-bezier(.22,1,.36,1) both;}
+.toast.out{animation:toastOut .25s ease forwards;}
+@keyframes toastIn{from{opacity:0;transform:translateX(20px) scale(0.96);}}
+@keyframes toastOut{to{opacity:0;transform:translateX(20px) scale(0.96);}}
+.toast-ico{font-size:18px;flex-shrink:0;}
+.toast-body strong{display:block;font-weight:500;margin-bottom:2px;}
+.toast-body span{font-size:11.5px;color:var(--text2);}
+</style>
+</head>
+<body>
+
+<div class="screen active" id="screen-connect">
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+  <div class="connect-card">
+    <div class="brand">
+      <div class="brand-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 14h-2v-5h2v5zm0-7h-2V7h2v2z"/></svg></div>
+      <div class="brand-name">Link <em>for intervals.icu</em></div>
+    </div>
+    <h1 class="connect-title">Polacz swoje konto</h1>
+    <p class="connect-sub">Powiadomienia o nowych treningach, ocenach trenera i wiadomosciach w jednym miejscu.</p>
+    <div class="field-group">
+      <div class="field-label">
+        <span>Klucz API</span>
+        <a href="https://intervals.icu/settings" target="_blank">Wygeneruj klucz</a>
+      </div>
+      <div class="input-wrap">
+        <input type="password" id="api-key-input" placeholder="Wklej klucz API z intervals.icu" autocomplete="off" spellcheck="false"/>
+        <button class="eye-btn" onclick="togglePwd()">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="remember-row">
+        <input type="checkbox" id="remember-me" checked>
+        <label for="remember-me">Zapamietaj mnie na tym urzadzeniu</label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-label">
+        <span>GitHub Token</span>
+        <a href="https://github.com/settings/tokens/new?scopes=gist&description=intervals-link" target="_blank">Generuj (scope: gist)</a>
+      </div>
+      <div class="input-wrap">
+        <input type="password" id="gist-token-input" placeholder="ghp_... (scope: gist)" autocomplete="off" spellcheck="false"/>
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">
+        <span>Gist ID</span>
+        <a href="https://gist.github.com" target="_blank">Utw&oacute;rz pusty Gist</a>
+      </div>
+      <div class="input-wrap">
+        <input type="text" id="gist-id-input" placeholder="abc123def456..." autocomplete="off" spellcheck="false"/>
+      </div>
+      <div style="margin-top:5px;font-size:11px;color:var(--text3);">Wymagane do push gdy strona zamkni&ecirc;ta. Gist ID to ostatnia czesc URL gista.</div>
+    </div>
+    <div class="key-hint">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <p>Klucz trafia wylacznie do lokalnego <code>proxy.php</code> na XAMPP. Nigdzie indziej.</p>
+    </div>
+    <button class="btn-connect" id="btn-connect" onclick="handleConnect()">
+      <span class="btn-text">Polacz z intervals.icu</span>
+      <div class="spinner"></div>
+    </button>
+    <div class="connect-error" id="connect-error"></div>
+    <div class="divider">lub</div>
+    <button class="btn-demo" onclick="handleDemo()">Wyprobuj demo bez konta</button>
+    <p class="footer-note">
+      <a href="https://intervals.icu/settings" target="_blank">intervals.icu &rarr; Settings &rarr; Developer Settings</a>
+    </p>
+  </div>
+</div>
+
+<div class="screen" id="screen-dashboard">
+  <div class="topnav">
+    <div class="topnav-brand">
+      <div class="topnav-icon"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 14h-2v-5h2v5zm0-7h-2V7h2v2z"/></svg></div>
+      <div class="topnav-title">Link <span>intervals.icu</span></div>
+    </div>
+    <div class="status-pill">
+      <div class="sdot" id="sdot"></div>
+      <span id="stxt">Laczenie...</span>
+    </div>
+    <div class="topnav-right">
+      <button class="push-pill" id="push-pill" onclick="togglePush()">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span id="push-label">Push</span>
+      </button>
+      <div class="athlete-chip">
+        <div class="athlete-avatar" id="av">?</div>
+        <span class="athlete-name-lbl" id="aname">-</span>
+      </div>
+    </div>
+  </div>
+  <div class="dash-body">
+    <div class="demo-banner" id="demo-banner">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      Tryb demo. <a href="#" onclick="goBack();return false;" style="color:var(--amber);text-decoration:underline;">Polacz prawdziwe konto</a>
+    </div>
+    <div class="summary-bar">
+      <div class="sc"><div class="sc-lbl">Treningi</div><div class="sc-val w" id="cnt-w">0</div><div class="sc-ico">&#127939;</div></div>
+      <div class="sc"><div class="sc-lbl">Oceny</div><div class="sc-val t" id="cnt-t">0</div><div class="sc-ico">&#10003;</div></div>
+      <div class="sc"><div class="sc-lbl">Wiadomosci</div><div class="sc-val m" id="cnt-m">0</div><div class="sc-ico">&#128172;</div></div>
+    </div>
+    <div class="controls-row">
+      <button class="fp on fw" data-f="w" onclick="toggleF(this)"><span class="dot"></span>Treningi</button>
+      <button class="fp on ft" data-f="t" onclick="toggleF(this)"><span class="dot"></span>Oceny</button>
+      <button class="fp on fm" data-f="m" onclick="toggleF(this)"><span class="dot"></span>Wiadomosci</button>
+      <div class="ml"></div>
+      <button class="rbtn" id="rbtn" onclick="manualRefresh()">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+      </button>
+    </div>
+    <div class="sec-lbl">Powiadomienia</div>
+    <div class="nlist" id="nlist"></div>
+    <div class="poll-bar">
+      <span id="last-chk">Oczekiwanie...</span>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span>Co</span>
+        <select class="isel" id="isel" onchange="updateInterval()">
+          <option value="15">15 sek</option>
+          <option value="30" selected>30 sek</option>
+          <option value="60">1 min</option>
+          <option value="120">2 min</option>
+          <option value="300">5 min</option>
+        </select>
+        <button class="disc-btn" onclick="goBack()">Rozlacz</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// URL Cloudflare Worker lub lokalnego proxy.php
+var VAPID_PUBLIC_KEY = 'BD77g5_qLwztUWq0KVqgY23PzCjEqV9lPXEIhxWyjsF9MOW0z5qDvyugr0lalS5awwWraS3loqh5MrS8-TMSC2E';
+var MY_ATHLETE_ID = 'i165270'; // filtrowanie wlasnych wiadomosci
+// Ustaw swój Worker URL po wdrożeniu na Cloudflare
+var PROXY_URL = localStorage.getItem('intervals_proxy_url') || '/api/proxy';
+var apiKey='', athleteId='0';
+var notifications=[], seenIds={};
+var pollingTimer=null, isDemo=false, firstPoll=true;
+var activeFilters={w:true,t:true,m:true};
+var swReg=null, pushGranted=false;
+var LS_KEY='intervals_link_v2';
+
+// --- localStorage ---
+function saveSession(){
+  try{
+    if(document.getElementById('remember-me').checked){
+      localStorage.setItem(LS_KEY,JSON.stringify({
+        apiKey:apiKey, athleteId:athleteId,
+        interval:document.getElementById('isel').value,
+        proxyUrl:PROXY_URL
+      }));
+    }
+  }catch(e){}
+}
+function loadSession(){
+  try{ var r=localStorage.getItem(LS_KEY); return r?JSON.parse(r):null; }catch(e){ return null; }
+}
+function clearSession(){
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+}
+
+// --- Service Worker ---
+function initSW(){
+  if(!('serviceWorker' in navigator)) return;
+  // Ustal bazowy URL (GitHub Pages moze miec podkatalog)
+  var swUrl = (location.pathname.split('/').slice(0,2).join('/') || '') + '/sw.js';
+  navigator.serviceWorker.register(swUrl).then(function(reg){
+    swReg = reg;
+    updatePushUI();
+    console.log('[SW] zarejestrowany:', swUrl);
+    // Jezeli SW juz aktywny — od razu aktualizuj UI
+    if(reg.active) updatePushUI();
+    reg.addEventListener('updatefound', function(){ updatePushUI(); });
+  }).catch(function(e){
+    console.warn('[SW] blad rejestracji:', e.message);
+  });
+}
+function updatePushUI(){
+  var pill=document.getElementById('push-pill');
+  var lbl=document.getElementById('push-label');
+  if(!('Notification' in window)){ pill.style.display='none'; return; }
+  var p=Notification.permission;
+  pushGranted=(p==='granted');
+  if(p==='denied'){ pill.className='push-pill denied'; lbl.textContent='Push: zablok.'; return; }
+  if(p!=='granted'){ pill.className='push-pill'; lbl.textContent='Push: wyl.'; return; }
+  // Sprawdz czy faktycznie mamy aktywna subskrypcje
+  if(swReg && swReg.pushManager){
+    swReg.pushManager.getSubscription().then(function(sub){
+      if(sub){ pill.className='push-pill granted'; lbl.textContent='Push: wl. (klik=wyl.)'; }
+      else   { pill.className='push-pill'; lbl.textContent='Push: wyl.'; }
+    }).catch(function(){ pill.className='push-pill granted'; lbl.textContent='Push: wl.'; });
+  } else {
+    pill.className='push-pill granted'; lbl.textContent='Push: wl.';
+  }
+}
+function togglePush(){
+  if(!('Notification' in window)){ showToast('!','Brak wsparcia','Przegladarka nie obsluguje powiadomien.'); return; }
+  if(Notification.permission==='denied'){ showToast('!','Zablokowane','Odblokuj powiadomienia w ustawieniach przegladarki dla tej strony.'); return; }
+
+  if(Notification.permission==='granted'){
+    // Sprawdz czy jestesmy juz zapisani
+    if(!swReg){ showToast('!','Blad','Service Worker nie gotowy.'); return; }
+    swReg.pushManager.getSubscription().then(function(sub){
+      if(sub){
+        // Jestesmy zapisani — pytaj czy wylaczyc
+        if(!confirm('Wylaczyc powiadomienia push?')) return;
+        sub.unsubscribe().then(function(){
+          return fetch('https://api.github.com/gists/'+GIST_ID, {
+            method: 'PATCH',
+            headers: { Authorization:'Bearer '+GIST_TOKEN, 'Content-Type':'application/json', 'User-Agent':'intervals-link' },
+            body: JSON.stringify({ files: { 'db.json': { content: JSON.stringify({ subscriptions: {}, seen: {} }, null, 2) } } })
+          });
+        }).then(function(){
+          pushGranted=false;
+          updatePushUI();
+          showToast('ok','Push wylaczony','Powiadomienia push zostaly wylaczone.');
+        }).catch(function(e){ showToast('!','Blad',e.message); });
+      } else {
+        // Nie jestesmy zapisani — zapisz
+        subscribePush();
+      }
+    });
+    return;
+  }
+
+  Notification.requestPermission().then(function(p){
+    updatePushUI();
+    if(p==='granted') subscribePush();
+  });
+}
+
+function subscribePush(){
+  if(!swReg){ showToast('!','Blad','Service Worker nie jest gotowy.'); return; }
+  if(!apiKey){ showToast('!','Blad','Najpierw polacz konto.'); return; }
+  var appServerKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+  swReg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: appServerKey
+  }).then(function(sub){
+    return saveSubscriptionToGist(sub.toJSON());
+  }).then(function(){
+    showToast('ok','Push wlaczony!','Powiadomienia beda przychodzic nawet gdy strona jest zamknieta.');
+    updatePushUI();
+  }).catch(function(e){
+    console.warn('[push] subscribe error:', e);
+    showToast('!','Blad push',e.message||'Nie udalo sie zarejestrowac push.');
+  });
+}
+
+// Token i Gist ID z localStorage (wpisywane przez uzytkownika)
+var GIST_TOKEN = localStorage.getItem('icu_gist_token') || '';
+var GIST_ID    = localStorage.getItem('icu_gist_id')    || '';
+
+function saveSubscriptionToGist(sub){
+  return fetch('https://api.github.com/gists/'+GIST_ID, {
+    method: 'PATCH',
+    headers: {
+      Authorization: 'Bearer '+GIST_TOKEN,
+      'Content-Type': 'application/json',
+      'User-Agent': 'intervals-link'
+    },
+    body: JSON.stringify({
+      files: { 'db.json': { content: JSON.stringify({
+        subscriptions: { [athleteId]: { subscription: sub, apiKey: apiKey, athleteId: athleteId } },
+        seen: {}
+      }, null, 2) } }
+    })
+  }).then(function(r){
+    if(!r.ok) throw new Error('Gist HTTP '+r.status);
+    console.log('[push] Subskrypcja zapisana w Gist');
+  });
+}
+
+function urlBase64ToUint8Array(base64String){
+  var padding='='.repeat((4-base64String.length%4)%4);
+  var base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  var raw=atob(base64);
+  var arr=new Uint8Array(raw.length);
+  for(var i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+function sendPush(n){
+  if(!pushGranted) return;
+  // Jezeli permission granted ale brak SW — uzyj natywnego Notification API bezposrednio
+  if(!swReg || !swReg.active){
+    try{
+      new Notification(n.title, {
+        body: n.desc||'',
+        tag: n.id,
+        icon: ''
+      });
+    }catch(e){ console.warn('[push] Notification fallback error:', e); }
+    return;
+  }
+  // SW gotowy — wyslij przez postMessage
+  try{
+    swReg.active.postMessage({
+      type: 'NOTIFY',
+      payload: { id: n.id, title: n.title, body: n.desc||'' }
+    });
+  }catch(e){
+    // Ostateczny fallback
+    try{ new Notification(n.title, { body: n.desc||'', tag: n.id }); }catch(e2){}
+  }
+}
+
+// --- Toast ---
+function showToast(ico,title,body,dur){
+  dur=dur||4000;
+  var wrap=document.getElementById('toast-wrap');
+  var el=document.createElement('div');
+  el.className='toast';
+  el.innerHTML='<div class="toast-ico">'+ico+'</div><div class="toast-body"><strong>'+esc(title)+'</strong><span>'+esc(body||'')+'</span></div>';
+  wrap.appendChild(el);
+  setTimeout(function(){ el.classList.add('out'); setTimeout(function(){ if(el.parentNode)el.parentNode.removeChild(el); },300); },dur);
+}
+
+// --- Auth UI ---
+function togglePwd(){
+  var inp=document.getElementById('api-key-input');
+  inp.type=inp.type==='password'?'text':'password';
+}
+function showErr(msg){ var el=document.getElementById('connect-error'); el.textContent=msg; el.style.display='block'; }
+function hideErr(){ document.getElementById('connect-error').style.display='none'; }
+
+function handleConnect(){
+  var key=document.getElementById('api-key-input').value.trim();
+  var gt=document.getElementById('gist-token-input').value.trim();
+  var gi=document.getElementById('gist-id-input').value.trim();
+  if(gt){ GIST_TOKEN=gt; localStorage.setItem('icu_gist_token',gt); }
+  if(gi){ GIST_ID=gi;    localStorage.setItem('icu_gist_id',gi); }
+  GIST_TOKEN = localStorage.getItem('icu_gist_token') || '';
+  GIST_ID    = localStorage.getItem('icu_gist_id')    || '';
+  if(GIST_TOKEN) document.getElementById('gist-token-input').value=GIST_TOKEN;
+  if(GIST_ID)    document.getElementById('gist-id-input').value=GIST_ID;
+  PROXY_URL='';
+  if(!key){ showErr('Wklej klucz API.'); return; }
+  var btn=document.getElementById('btn-connect');
+  btn.classList.add('loading'); btn.disabled=true; hideErr();
+  apiFetch(key,'0','').then(function(data){
+    apiKey=key; athleteId=String(data.id||'0'); isDemo=false;
+    saveSession(); initDash(data.name||'Atleta');
+  }).catch(function(e){
+    var msg=e.message||'';
+    showErr(msg.indexOf('403')>=0||msg.indexOf('401')>=0
+      ?'Nieprawidlowy klucz API. Sprawdz w intervals.icu -> Settings.'
+      :'Blad polaczenia: '+msg);
+  }).finally(function(){ btn.classList.remove('loading'); btn.disabled=false; });
+}
+function handleDemo(){
+  isDemo=true; apiKey=''; athleteId='0'; clearSession();
+  initDash('Demo Athlete'); loadDemo();
+}
+function goBack(){
+  stopPolling();
+  document.getElementById('screen-dashboard').classList.remove('active');
+  document.getElementById('screen-connect').classList.add('active');
+  document.getElementById('api-key-input').value='';
+  clearSession(); notifications=[]; renderList();
+}
+
+// --- API ---
+function apiFetchDirect(key,path,params){
+  params=params||'';
+  var clean=params.replace(/^\?/,'');
+  if(PROXY_URL){
+    var qs='directpath='+encodeURIComponent(path)
+      +'&apikey='+encodeURIComponent(key)
+      +(clean?'&params='+encodeURIComponent(clean):'');
+    return fetch(PROXY_URL+'?'+qs,{
+      headers:{'Authorization':'Basic '+btoa('API_KEY:'+key)}
+    }).then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    });
+  }
+  var url='https://intervals.icu/api/v1'+path+(clean?'?'+clean:'');
+  return fetch(url,{
+    headers:{'Authorization':'Basic '+btoa('API_KEY:'+key)}
+  }).then(function(res){
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  });
+}
+function apiFetch(key,aid,path,params){
+  params=params||'';
+  var clean=params.replace(/^\?/,'');
+  if(PROXY_URL){
+    var proxyPath=aid+(path||'');
+    var qs='path='+encodeURIComponent(proxyPath)
+      +'&apikey='+encodeURIComponent(key)
+      +(clean?'&params='+encodeURIComponent(clean):'');
+    return fetch(PROXY_URL+'?'+qs,{
+      headers:{'Authorization':'Basic '+btoa('API_KEY:'+key)}
+    }).then(function(res){
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    });
+  }
+  // Bezposrednie wywolanie intervals.icu (dziala gdy serwer wspiera CORS)
+  var url='https://intervals.icu/api/v1/athlete/'+aid+(path||'')+(clean?'?'+clean:'');
+  return fetch(url,{
+    headers:{'Authorization':'Basic '+btoa('API_KEY:'+key)}
+  }).then(function(res){
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    return res.json();
+  });
+}
+
+// --- Dashboard ---
+function initDash(name){
+  document.getElementById('screen-connect').classList.remove('active');
+  document.getElementById('screen-dashboard').classList.add('active');
+  var ini=name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+  document.getElementById('av').textContent=ini;
+  document.getElementById('aname').textContent=name.split(' ')[0];
+  document.getElementById('demo-banner').style.display=isDemo?'flex':'none';
+  setStatus('','Laczenie...');
+  notifications=[]; seenIds={}; firstPoll=true;
+  renderList(); updatePushUI();
+  if(!isDemo){ poll(); schedulePolling(); }
+  // Auto-subscribe push jesli uzytkownik juz dal zgode
+  if(!isDemo && Notification.permission==='granted' && swReg){
+    setTimeout(subscribePush, 1000);
+  }
+}
+function schedulePolling(){
+  stopPolling();
+  var ms=parseInt(document.getElementById('isel').value)*1000;
+  pollingTimer=setInterval(poll,ms);
+}
+function stopPolling(){ if(pollingTimer){ clearInterval(pollingTimer); pollingTimer=null; } }
+function updateInterval(){ saveSession(); if(!isDemo) schedulePolling(); }
+function manualRefresh(){
+  if(isDemo) return;
+  var btn=document.getElementById('rbtn'); btn.classList.add('spinning');
+  poll().then(function(){ setTimeout(function(){ btn.classList.remove('spinning'); },600); });
+}
+
+// --- Poll ---
+function poll(){
+  setStatus('','Sprawdzanie...');
+  var days=7, today=new Date();
+  var from=new Date(today); from.setDate(from.getDate()-days);
+  var oldest=from.toISOString().slice(0,10);
+  var newest=new Date(today.getTime()+7*86400000).toISOString().slice(0,10);
+  var found=[], errors=0;
+
+  // 1. Zaplanowane treningi
+  var p1=apiFetch(apiKey,athleteId,'/events','?oldest='+oldest+'&newest='+newest+'&category=WORKOUT').then(function(evs){
+    (evs||[]).forEach(function(ev){
+      var key='w:'+ev.id;
+      if(!seenIds[key]){
+        seenIds[key]=1;
+        found.push({id:key,type:'w',isNew:!firstPoll,
+          title:ev.name||'Nowy trening',
+          desc:(ev.description||'').replace(/<[^>]*>/g,'').slice(0,120)||ev.type||'',
+          date:ev.start_date_local});
+      }
+    });
+  }).catch(function(e){ console.warn('[events]',e.message); errors++; });
+
+  // 2. Oceny trenera — activities z coach_note lub icu_coach_tick
+  var p2=apiFetch(apiKey,athleteId,'/activities','?oldest='+oldest+'&newest='+newest).then(function(acts){
+    if(acts&&acts.length){
+      var s=acts[0];
+      var coachKeys=Object.keys(s).filter(function(k){
+        return k.indexOf('coach')>=0||k.indexOf('tick')>=0||k.indexOf('note')>=0;
+      });
+      console.log('[activities] coach keys:',coachKeys.join(', '));
+
+    }
+    (acts||[]).forEach(function(a){
+      var note=a.coach_note||a.icu_coach_note||a.coach_feedback||'';
+      // coach_tick to liczba 1-5 (ocena trenera), null = brak oceny
+      var tickVal=a.coach_tick||a.icu_coach_tick;
+      var hasTick=tickVal!==null&&tickVal!==undefined&&tickVal!==0;
+      if(hasTick||(note&&note.trim())){
+        var key='t:'+a.id;
+        if(!seenIds[key]){
+          seenIds[key]=1;
+          var stars='';
+          if(hasTick){ for(var si=0;si<tickVal;si++) stars+='&#11088;'; }
+          var desc=note.trim()||(stars?'Ocena trenera: '+stars:'Trener ocenił aktywność');
+          found.push({id:key,type:'t',isNew:!firstPoll,
+            title:'Ocena '+(tickVal?tickVal+'/5':'')+': '+(a.name||'Aktywność'),
+            desc:desc,
+            date:a.start_date_local});
+        }
+      }
+    });
+  }).catch(function(e){ console.warn('[activities]',e.message); errors++; });
+
+  // 3. Wiadomosci — /chats -> /chats/{id}/messages
+  var p3=apiFetch(apiKey,athleteId,'/chats','').then(function(chats){
+    console.log('[chats] otrzymano',( chats||[]).length,'chatow');
+    if(!chats||!chats.length) return Promise.resolve();
+    var cutoff=new Date(today); cutoff.setDate(cutoff.getDate()-days);
+    var sub=(chats||[]).map(function(chat){
+      if(new Date(chat.updated||0)<cutoff) return Promise.resolve();
+      return apiFetchDirect(apiKey,'/chats/'+chat.id+'/messages','?limit=10')
+        .then(function(msgs){
+          console.log('[chats]',chat.name,'->',JSON.stringify((msgs||[]).slice(0,1)).slice(0,200));
+          (msgs||[]).forEach(function(m){
+            // Pominij wiadomosci wyslane przez siebie
+            if(m.athlete_id===athleteId||m.athlete_id===MY_ATHLETE_ID) return;
+            var key='m:'+(m.id||m.created||String(Math.random()).slice(2));
+            if(!seenIds[key]){
+              seenIds[key]=1;
+              found.push({id:key,type:'m',isNew:!firstPoll,
+                title:m.name||m.athlete_name||m.sender_name||chat.name||'Nowa wiadomosc',
+                desc:(m.content||m.text||m.body||'').replace(/<[^>]*>/g,'').slice(0,120),
+                date:m.created||m.created_at||chat.updated});
+            }
+          });
+        })
+        .catch(function(e){ console.warn('[chats] msgs '+chat.id+':',e.message); });
+    });
+    return Promise.all(sub);
+  }).catch(function(e){ console.warn('[chats]',e.message); errors++; });
+
+  return Promise.all([p1,p2,p3]).then(function(){
+    firstPoll=false;
+    found.forEach(function(n){
+      notifications.unshift(n);
+      if(n.isNew){ showToast(n.type==='w'?'&#127939;':n.type==='t'?'&#10003;':'&#128172;',n.title,n.desc||'',6000); sendPush(n); }
+    });
+    if(notifications.length>100) notifications=notifications.slice(0,100);
+    updateCounters(); renderList();
+    var now=new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('last-chk').textContent='Ostatnie: '+now;
+    setStatus(errors===3?'err':'live',errors===3?'Blad polaczenia':'Na zywo');
+  });
+}
+
+// --- Demo ---
+function loadDemo(){
+  setStatus('live','Demo');
+  var now=Date.now(), h=3600000;
+  notifications=[
+    {id:'w1',type:'w',isNew:false,title:'Intervalsy VO2max 4x8 min',desc:'Rozgrzewka 15 min, 4x8 min @ 105% FTP.',date:new Date(now-h*1).toISOString()},
+    {id:'t1',type:'t',isNew:false,title:'Ocena: Bieg progowy 45 min',desc:'Swietna robota! Tetno dobrze kontrolowane.',date:new Date(now-h*3).toISOString()},
+    {id:'m1',type:'m',isNew:false,title:'Wiadomosc od Tomasz Kowalski',desc:'Pamietaj o odpoczynku w srode przed startem.',date:new Date(now-h*5).toISOString()},
+    {id:'w2',type:'w',isNew:false,title:'Dlugi bieg Z2 - 90 min',desc:'Spokojne 90 min z tetnem ponizej 145 bpm.',date:new Date(now-h*26).toISOString()},
+    {id:'t2',type:'t',isNew:false,title:'Ocena: Jazda na rowerze 2h',desc:'Dobra praca nad kadencja. Celuj w 90+ RPM.',date:new Date(now-h*30).toISOString()},
+    {id:'m2',type:'m',isNew:false,title:'Wiadomosc od Tomasz Kowalski',desc:'Naprawde dobry progres. Trzymaj tak!',date:new Date(now-h*48).toISOString()},
+  ];
+  updateCounters(); renderList();
+  document.getElementById('last-chk').textContent='Dane demonstracyjne';
+}
+
+// --- Render ---
+function renderList(){
+  var list=document.getElementById('nlist');
+  var filtered=notifications.filter(function(n){ return activeFilters[n.type]; });
+  if(!filtered.length){
+    var msg=isDemo?'W trybie demo dane sa powyzej.':'Sprawdzam co '+document.getElementById('isel').value+' sekund...';
+    list.innerHTML='<div class="empty"><div class="empty-ico">&#128276;</div><div class="empty-title">Brak powiadomien</div><div class="empty-sub">'+msg+'</div></div>';
+    return;
+  }
+  list.innerHTML=filtered.map(function(n,i){
+    var ico=n.type==='w'?'&#127939;':n.type==='t'?'&#10003;':'&#128172;';
+    var tag=n.type==='w'?'Trening':n.type==='t'?'Ocena':'Wiadomosc';
+    return '<div class="ni" style="animation-delay:'+i*0.04+'s">'
+      +'<div class="ni-ico '+n.type+'">'+ico+'</div>'
+      +'<div class="ni-body">'
+        +'<div class="ni-title">'+esc(n.title)+'</div>'
+        +(n.desc?'<div class="ni-desc">'+esc(n.desc)+'</div>':'')
+        +'<div class="ni-meta"><span class="tag '+n.type+'">'+tag+'</span><span>'+relTime(n.date)+'</span></div>'
+      +'</div>'
+      +(n.isNew?'<div class="ni-new"></div>':'')
+      +'</div>';
+  }).join('');
+}
+function updateCounters(){
+  document.getElementById('cnt-w').textContent=notifications.filter(function(n){return n.type==='w';}).length;
+  document.getElementById('cnt-t').textContent=notifications.filter(function(n){return n.type==='t';}).length;
+  document.getElementById('cnt-m').textContent=notifications.filter(function(n){return n.type==='m';}).length;
+}
+function toggleF(btn){
+  var f=btn.dataset.f;
+  if(activeFilters[f]){
+    if(Object.keys(activeFilters).filter(function(k){return activeFilters[k];}).length===1) return;
+    activeFilters[f]=false; btn.classList.remove('on');
+  } else { activeFilters[f]=true; btn.classList.add('on'); }
+  renderList();
+}
+function setStatus(s,t){
+  var d=document.getElementById('sdot');
+  d.className='sdot'+(s==='live'?' live':s==='err'?' err':'');
+  document.getElementById('stxt').textContent=t;
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function relTime(d){
+  if(!d) return '';
+  var diff=Date.now()-new Date(d).getTime();
+  var m=Math.floor(diff/60000), h=Math.floor(m/60), day=Math.floor(h/24);
+  if(m<1) return 'przed chwila';
+  if(m<60) return m+' min temu';
+  if(h<24) return h+' godz. temu';
+  if(day<7) return day+' dni temu';
+  return new Date(d).toLocaleDateString('pl-PL',{day:'numeric',month:'short'});
+}
+
+// --- Init ---
+document.getElementById('api-key-input').addEventListener('keydown',function(e){ if(e.key==='Enter') handleConnect(); });
+initSW();
+
+// Auto-login
+(function(){
+  var s=loadSession();
+  PROXY_URL='';
+  if(s&&s.apiKey){
+    document.getElementById('api-key-input').value=s.apiKey;
+    document.getElementById('remember-me').checked=true;
+    if(s.interval){
+      var sel=document.getElementById('isel');
+      for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===s.interval){ sel.selectedIndex=i; break; } }
+    }
+    var btn=document.getElementById('btn-connect');
+    btn.classList.add('loading'); btn.disabled=true;
+    apiFetch(s.apiKey,'0','').then(function(data){
+      apiKey=s.apiKey; athleteId=String(data.id||s.athleteId||'0'); isDemo=false;
+      initDash(data.name||'Atleta');
+    }).catch(function(){
+      btn.classList.remove('loading'); btn.disabled=false; clearSession();
+    });
+  }
+})();
+</script>
+</body>
+</html>

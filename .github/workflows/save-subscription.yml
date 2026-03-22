@@ -1,0 +1,70 @@
+name: Save push subscription
+
+on:
+  workflow_dispatch:
+    inputs:
+      payload:
+        description: 'Push subscription JSON'
+        required: true
+        type: string
+
+jobs:
+  save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save subscription to Gist
+        env:
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_ID:    ${{ secrets.GIST_ID }}
+          PAYLOAD:    ${{ inputs.payload }}
+        run: |
+          node << 'NODEEOF'
+          const payload = JSON.parse(process.env.PAYLOAD);
+          const gistId  = process.env.GIST_ID;
+          const token   = process.env.GIST_TOKEN;
+
+          async function main() {
+            // Wczytaj obecny db.json
+            const r1 = await fetch(`https://api.github.com/gists/${gistId}`, {
+              headers: { Authorization: `Bearer ${token}`, 'User-Agent': 'intervals-link' }
+            });
+            const gist = await r1.json();
+            let db = { subscriptions: {}, seen: {} };
+            try {
+              const raw = gist.files['db.json'] && gist.files['db.json'].content;
+              if (raw) db = JSON.parse(raw);
+            } catch(e) {}
+
+            if (!db.subscriptions) db.subscriptions = {};
+
+            // Zapisz lub usun subskrypcje
+            if (payload.action === 'subscribe') {
+              db.subscriptions[payload.athleteId] = {
+                subscription: payload.subscription,
+                apiKey: payload.apiKey,
+                athleteId: payload.athleteId
+              };
+              console.log('Subskrypcja zapisana dla:', payload.athleteId);
+            } else if (payload.action === 'unsubscribe') {
+              delete db.subscriptions[payload.athleteId];
+              console.log('Subskrypcja usunieta dla:', payload.athleteId);
+            }
+
+            // Zapisz db.json do Gista
+            const r2 = await fetch(`https://api.github.com/gists/${gistId}`, {
+              method: 'PATCH',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'User-Agent': 'intervals-link'
+              },
+              body: JSON.stringify({
+                files: { 'db.json': { content: JSON.stringify(db, null, 2) } }
+              })
+            });
+            if (!r2.ok) throw new Error('Gist write HTTP ' + r2.status);
+            console.log('Gist zaktualizowany OK');
+          }
+
+          main().catch(e => { console.error(e); process.exit(1); });
+          NODEEOF
